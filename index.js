@@ -1,7 +1,23 @@
 'use strict'
 const express = require('express')
 const app = express()
+const morgan = require('morgan')
+
 app.use(express.json())
+
+const customMorganFormatFunction = (tokens, req, res) => {
+    const body = req.method === 'POST' ? JSON.stringify(req.body) : '';
+    return [
+        tokens.method(req, res),
+        tokens.url(req, res),
+        tokens.status(req, res),
+        tokens.res(req, res, 'content-length'), '-',
+        tokens['response-time'](req, res), 'ms',
+        body
+    ].join(' ')
+}
+
+app.use(morgan(customMorganFormatFunction))
 
 let persons = [
     {
@@ -86,6 +102,12 @@ const generateId = () => Math.floor(Math.random() * 100000);
 const isDuplicateName = (name) => {
     return persons.some((person) => person.name === name)
 }
+
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
 
 
 const PORT = 3001
