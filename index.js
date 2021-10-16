@@ -1,8 +1,11 @@
 'use strict'
+require('dotenv').config()
 const express = require('express')
 const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
+const Person = require('./models/person')
+
 
 app.use(cors())
 app.use(express.static('build'))
@@ -57,14 +60,18 @@ app.get('/info', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    console.log(request)
-    const id = +request.params.id
-    const person = persons.find(person => person.id === id)
-    if (person) {
+    Person.findById(request.params.id).then(person => {
         response.json(person)
-    } else {
-        response.status(404).end()
-    }
+    })
+
+
+    // const id = +request.params.id
+    // const person = persons.find(person => person.id === id)
+    // if (person) {
+    //     response.json(person)
+    // } else {
+    //     response.status(404).end()
+    // }
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -76,31 +83,38 @@ app.delete('/api/persons/:id', (request, response) => {
 
 
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
+    // response.json(persons)
+    Person.find({}).then(persons => {
+        response.json(persons)
+    })
 })
 
 app.post('/api/persons', (request, response) => {
     const body = request.body
 
-    if (!body.name || !body.number) {
-        return response.status(400).json({
-            error: 'content missing'
-        })
-    }
-    if (isDuplicateName(body.name)) {
-        return response.status(400).json({
-            error: 'The name already exists in the phonebook'
-        })
-    }
+    // if (!body.name || !body.number) {
+    //     return response.status(400).json({
+    //         error: 'content missing'
+    //     })
+    // }
+    // if (isDuplicateName(body.name)) {
+    //     return response.status(400).json({
+    //         error: 'The name already exists in the phonebook'
+    //     })
+    // }
 
-    const person = {
+    const person = new Person({
         number: body.number,
         name: body.name,
-        id: generateId(),
-    }
+    })
 
-    persons = persons.concat(person)
-    response.json(person)
+    person.save().then(savedPerson => {
+        response.json(savedPerson)
+    })
+
+
+    // persons = persons.concat(person)
+    // response.json(person)
 })
 
 const generateId = () => Math.floor(Math.random() * 100000);
