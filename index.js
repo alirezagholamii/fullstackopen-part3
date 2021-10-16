@@ -57,6 +57,7 @@ app.get('/info', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response) => {
+    console.log(request)
     const id = +request.params.id
     const person = persons.find(person => person.id === id)
     if (person) {
