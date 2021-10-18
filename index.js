@@ -60,9 +60,11 @@ app.delete('/api/persons/:id', (request, response, next) => {
 
 
 app.get('/api/persons', (request, response) => {
-    Person.find({}).then(persons => {
-        response.json(persons)
-    })
+    Person
+        .find({})
+        .then(persons => {
+            response.json(persons)
+        })
 })
 
 app.post('/api/persons', (request, response, next) => {
@@ -73,7 +75,7 @@ app.post('/api/persons', (request, response, next) => {
     })
     person
         .save()
-        .then(savedPerson => savedPerson.toJSON())
+        .then(res => res.toJSON())
         .then(savedPerson => {
             response.json(savedPerson)
         })
@@ -87,7 +89,8 @@ app.put('/api/persons/:id', (request, response, next) => {
         name: body.name,
         number: body.number,
     }
-    Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    Person
+        .findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true })
         .then(updatedPerson => {
             response.json(updatedPerson)
         })
